@@ -6,7 +6,7 @@ int main()
 {
   try
   {
-    App *app = new App("try this");
+    App *app = new App("pong v1.0.0");
     app->mainloop();
     delete app;
   }

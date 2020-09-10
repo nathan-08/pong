@@ -15,7 +15,7 @@ app.o: app.cpp app.h globals.h
 textManager.o: textManager.cpp textManager.h
 	$C -c $< $(INC)
 
-ball.o: ball.cpp ball.h globals.h
+ball.o: ball.cpp ball.h globals.h bar.h
 	$C -c $< $(INC)
 
 bar.o: bar.cpp bar.h globals.h

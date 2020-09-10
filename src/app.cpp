@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdint>
+#include <vector>
 
 #include "app.h"
 #include "globals.h"
@@ -24,7 +25,7 @@ App::App(const char *appName)
       SDL_WINDOW_SHOWN );
   if( !gWindow )
   {
-    fprintf(stderr, "Window error: %s\n", "my error" );
+    fprintf(stderr, "Window error: %s\n", SDL_GetError() );
     throw std::runtime_error("");
   }
 
@@ -88,18 +89,21 @@ App::~App()
 
 void App::mainloop()
 {
+  bool paused = false;
   uint32_t frame_counter = 0;
   SDL_Event e;
   bool quit = false;
   TextArea line1( gRenderer, 0, 0, 0, 0 );
   GlyphCache gc( gRenderer, gFont );
+  std::vector<Bar> bars;
   soundFx["coin"] = Mix_LoadWAV("../assets/audio/coin.wav");
   soundFx["powup"] = Mix_LoadWAV("../assets/audio/powerup.wav");
   if( !soundFx["coin"] || !soundFx["powup"] )
     throw std::runtime_error( "Failed to load sound fx\n" );
 
-  Ball b;
-  Bar bar;
+  Ball ball;
+  bars.push_back( Bar(80, 80) );
+  bars.push_back( Bar( 80, L_HEIGHT - 80 - Bar::BAR_HEIGHT ) );
 
   while( !quit )
   {
@@ -110,11 +114,8 @@ void App::mainloop()
       {
         switch( e.key.keysym.sym )
         {
-          case SDLK_a:
-            Mix_PlayChannel( -1, soundFx["powup"], 0 );
-            break;
-          case SDLK_s:
-            Mix_PlayChannel( -1, soundFx["coin"], 0 );
+          case SDLK_p:
+            paused = !paused;
             break;
         }
       }
@@ -122,22 +123,25 @@ void App::mainloop()
       {
         //
       }
-      bar.handleEvent( e );
+      if( !paused )
+      for( auto i = bars.begin(); i < bars.end(); i++ )
+        i->handleEvent( e );
     }
 
-    bar.move();
-
-    if( frame_counter % 2 == 0 )
-      if( b.move( bar.getCollider() ) ) {
-        Mix_PlayChannel( -1, soundFx["coin"], 0 );
-      }
+    if( !paused ) {
+    if( ball.move( bars ) ) {
+      Mix_PlayChannel( -1, soundFx["coin"], 0 );
+    }
+    for( auto i = bars.begin(); i < bars.end(); i++ )
+      i->move();
+    }
 
     SDL_SetRenderDrawColor( gRenderer, 0x42, 0x87, 0xf5, 0xFF );
     SDL_RenderClear( gRenderer );
-    line1.renderPrint( gc, "score: 0" );
 
-    b.render( gRenderer );
-    bar.render( gRenderer );
+    ball.render( gRenderer );
+    for( auto i = bars.begin(); i < bars.end(); i++ )
+      i->render( gRenderer );
 
     SDL_RenderPresent( gRenderer );
     frame_counter++;

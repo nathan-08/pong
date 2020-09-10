@@ -10,11 +10,13 @@ class Bar
     SDL_Rect mCollider;
 
   public:
-    static const int BAR_WIDTH = 1;
-    static const int BAR_HEIGHT = 4;
-    static const int VEL = 1;
+    static const int BAR_WIDTH = 300;
+    static const int BAR_HEIGHT = 60;
+    static const int VEL = 12;
+    int getVelX() const { return mVelX; }
+    int getVelY() const { return mVelY; }
 
-    Bar();
+    Bar( int x, int y );
 
     void handleEvent( SDL_Event &e );
 
@@ -22,5 +24,5 @@ class Bar
 
     void render( SDL_Renderer *r );
     
-    const SDL_Rect& getCollider() { return mCollider; };
+    const SDL_Rect& getCollider() const { return mCollider; };
 };

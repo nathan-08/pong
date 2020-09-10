@@ -3,7 +3,7 @@
 
 Ball::Ball()
 {
-  mPosX = 0;
+  mPosX = L_WIDTH / 2;
   mPosY = 0;
   mVelX = BALL_VEL;
   mVelY = BALL_VEL;
@@ -11,8 +11,14 @@ Ball::Ball()
   mCollider.h = BALL_HEIGHT;
 }
 
-bool Ball::checkCollision( const SDL_Rect &a, const SDL_Rect &b )
+CollisionAxis Ball::checkCollision( const Bar &bar )
 {
+  const SDL_Rect a = mCollider;
+  const SDL_Rect b = bar.getCollider();
+
+  int barVelX = bar.getVelX();
+  int barVelY = bar.getVelY();
+
   int leftA, leftB;
   int rightA, rightB;
   int topA, topB;
@@ -28,11 +34,113 @@ bool Ball::checkCollision( const SDL_Rect &a, const SDL_Rect &b )
   topB = b.y;
   bottomB = b.y + b.h;
 
-  if( bottomA <= topB ) return false;
-  if( topA >= bottomB ) return false;
-  if( rightA <= leftB ) return false;
-  if( leftA >= rightB ) return false;
-  return true;
+  // determine if within vertical range of object
+  if( bottomA - mVelY > topB + Bar::VEL && topA - mVelY < bottomB - Bar::VEL )
+  {
+    // within vertical range
+    // determine horizontal direction
+
+    if( rightA > leftB  // check for horizontal collision
+        && leftA < rightB )
+    {
+      if( mVelX > 0 ) // moving right
+      {
+        if( barVelX <= 0 )
+        {
+          mVelX = barVelX ? barVelX : -BALL_VEL;
+          mPosX = leftB - BALL_WIDTH + mVelX;
+          mCollider.x = mPosX;
+
+          mVelY = barVelY ? barVelY : mVelY;
+        }
+        else if( barVelX > 0 )
+        {
+          mVelX = barVelX;
+          mPosX = rightB + mVelX;
+          mCollider.x = mPosX;
+
+          mVelY = barVelY ? barVelY : mVelY;
+        }
+      }
+      else if( mVelX < 0 ) // moving left
+      {
+        if( barVelX >= 0 )
+        {
+          mVelX = barVelX ? barVelX : BALL_VEL;
+          mPosX = rightB + mVelX;
+          mCollider.x = mPosX;
+
+          mVelY = barVelY ? barVelY : mVelY;
+        }
+        else if( barVelX < 0 )
+        {
+          mVelX = barVelX;
+          mPosX = leftB - BALL_WIDTH + mVelX;
+          mCollider.x = mPosX;
+
+          mVelY = barVelY ? barVelY : mVelY;
+        }
+      }
+      mPosY += mVelY;
+      mCollider.y = mPosY;
+
+      return Vert;
+    }
+  }
+  if( rightA > leftB && leftA < rightB )
+  {
+    // within horizontal range
+    // determine vertical direction
+
+    if( bottomA > topB  // check for vertical collision
+        && topA < bottomB )
+    {
+      if( mVelY > 0 ) // moving down
+      {
+        if( barVelY <= 0 )
+        {
+          mVelY = barVelY ? barVelY : -BALL_VEL;
+          mPosY = topB - BALL_HEIGHT + mVelY;
+          mCollider.y = mPosY;
+
+          mVelX = barVelX ? barVelX : mVelX;
+        }
+        else if( barVelY > 0)
+        {
+          mVelY = barVelY;
+          mPosY = bottomB + mVelY;
+          mCollider.y = mPosY;
+
+          mVelX = barVelX ? barVelX : mVelX;
+        }
+      }
+      else if( mVelY < 0 ) // moving up
+      {
+        if( barVelY >= 0 )
+        {
+          mVelY = barVelY ? barVelY : BALL_VEL;
+          mPosY = bottomB + mVelY;
+          mCollider.y = mPosY;
+
+          mVelX = barVelX ? barVelX : mVelX;
+        }
+        else if( barVelY < 0 )
+        {
+          mVelY = barVelY;
+          mPosY = topB - BALL_HEIGHT + mVelY;
+          mCollider.y = mPosY;
+
+          mVelX = barVelX ? barVelX : mVelX;
+        }
+      }
+      mPosX += mVelX;
+      mCollider.x = mPosX;
+
+      return Horiz;
+    }
+  }
+
+  return None;
 }
 
 void Ball::handleEvent( SDL_Event &e )
@@ -49,25 +157,56 @@ void Ball::handleEvent( SDL_Event &e )
   }
 }
 
-bool Ball::move( const SDL_Rect &bar )
+bool Ball::move( const std::vector<Bar> &bars )
 {
   bool collided = false;
 
+  for( auto bar : bars )
+  {
+    CollisionAxis a = checkCollision( bar );
+    switch( a )
+    {
+      case Horiz:
+      case Vert:
+        return true;
+      default:
+        break;
+    }
+  }
+
   mPosX += mVelX;
   mCollider.x = mPosX;
-  if( ( mPosX < 0 ) || ( mPosX + BALL_WIDTH > L_WIDTH ) || checkCollision( mCollider, bar ) )
+  if( mPosX < 0 ) {
+    mPosX = 0;
+    mCollider.x = mPosX;
+    mVelX = -mVelX;
+    collided = true;
+  }
+  if( mPosX + BALL_WIDTH > L_WIDTH )
   {
+    mPosX = L_WIDTH - BALL_WIDTH;
+    mCollider.x = mPosX;
     mVelX = -mVelX;
     collided = true;
   }
 
   mPosY += mVelY;
   mCollider.y = mPosY;
-  if( ( mPosY < 0 ) || ( mPosY + BALL_HEIGHT > L_HEIGHT ) || checkCollision( mCollider, bar ))
+  if( mPosY < 0 )
   {
+    mPosY = 0;
+    mCollider.y = 0;
     mVelY = -mVelY;
     collided = true;
   }
+  if( mPosY + BALL_HEIGHT > L_HEIGHT )
+  {
+    mPosY = L_HEIGHT - BALL_HEIGHT;
+    mCollider.y = mPosY;
+    mVelY = -mVelY;
+    collided = true;
+  }
+
   return collided;
 }
 
