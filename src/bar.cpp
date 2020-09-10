@@ -3,7 +3,8 @@
 #include "bar.h"
 #include "globals.h"
 
-Bar::Bar( int x, int y )
+Bar::Bar( int x, int y, SDL_Keycode upkey, SDL_Keycode downkey, SDL_Keycode leftkey, SDL_Keycode rightkey )
+  : up( upkey ), down( downkey ), left( leftkey ), right( rightkey )
 {
   mPosX = x;
   mPosY = y;
@@ -18,23 +19,17 @@ void Bar::handleEvent( SDL_Event &e )
 {
   if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )
   {
-    switch( e.key.keysym.sym )
-    {
-      case SDLK_UP: mVelY -= VEL; break;
-      case SDLK_DOWN: mVelY += VEL; break;
-      case SDLK_LEFT: mVelX -= VEL; break;
-      case SDLK_RIGHT: mVelX += VEL; break;
-    }
+    if( e.key.keysym.sym == up ) mVelY -= VEL;
+    if( e.key.keysym.sym == down ) mVelY += VEL;
+    if( e.key.keysym.sym == left ) mVelX -= VEL;
+    if( e.key.keysym.sym == right ) mVelX += VEL;
   }
   else if( e.type == SDL_KEYUP && e.key.repeat == 0 )
   {
-    switch( e.key.keysym.sym )
-    {
-      case SDLK_UP: mVelY += VEL; break;
-      case SDLK_DOWN: mVelY -= VEL; break;
-      case SDLK_LEFT: mVelX += VEL; break;
-      case SDLK_RIGHT: mVelX -= VEL; break;
-    }
+    if( e.key.keysym.sym == up ) mVelY += VEL;
+    if( e.key.keysym.sym == down ) mVelY -= VEL;
+    if( e.key.keysym.sym == left ) mVelX += VEL;
+    if( e.key.keysym.sym == right ) mVelX -= VEL;
   }
 }
 

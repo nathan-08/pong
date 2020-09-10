@@ -102,8 +102,8 @@ void App::mainloop()
     throw std::runtime_error( "Failed to load sound fx\n" );
 
   Ball ball;
-  bars.push_back( Bar(80, 80) );
-  bars.push_back( Bar( 80, L_HEIGHT - 80 - Bar::BAR_HEIGHT ) );
+  bars.push_back( Bar(80, 80, SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT ) );
+  bars.push_back( Bar( 80, L_HEIGHT - 80 - Bar::BAR_HEIGHT, SDLK_w, SDLK_s, SDLK_a, SDLK_d ) );
 
   while( !quit )
   {
