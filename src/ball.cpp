@@ -157,8 +157,9 @@ void Ball::handleEvent( SDL_Event &e )
   }
 }
 
-bool Ball::move( const std::vector<Bar> &bars )
+MoveResult Ball::move( const std::vector<Bar> &bars )
 {
+  if( !isActive ) return Default;
   bool collided = false;
 
   for( auto bar : bars )
@@ -168,7 +169,7 @@ bool Ball::move( const std::vector<Bar> &bars )
     {
       case Horiz:
       case Vert:
-        return true;
+        return Collided;
       default:
         break;
     }
@@ -180,14 +181,16 @@ bool Ball::move( const std::vector<Bar> &bars )
     mPosX = 0;
     mCollider.x = mPosX;
     mVelX = -mVelX;
-    collided = true;
+    isActive = false;
+    return GoalLeft;
   }
   if( mPosX + BALL_WIDTH > L_WIDTH )
   {
     mPosX = L_WIDTH - BALL_WIDTH;
     mCollider.x = mPosX;
     mVelX = -mVelX;
-    collided = true;
+    isActive = false;
+    return GoalRight;
   }
 
   mPosY += mVelY;
@@ -207,13 +210,25 @@ bool Ball::move( const std::vector<Bar> &bars )
     collided = true;
   }
 
-  return collided;
+  return collided ? Collided : Default;
 }
 
 void Ball::render( SDL_Renderer *r )
 {
+  if( !isActive ) return;
   SDL_Rect rect{ mPosX, mPosY, BALL_WIDTH, BALL_HEIGHT };
   SDL_SetRenderDrawColor( r, 0xff, 0xff, 0xff, 0xff );
   SDL_RenderFillRect( r, &rect );
 }
 
+void Ball::reset()
+{
+  if( isActive ) return;
+  isActive = true;
+  mPosX = L_WIDTH / 2;
+  mPosY = L_HEIGHT / 2;
+  mCollider.x = mPosX;
+  mCollider.y = mPosY;
+  mVelX = BALL_VEL;
+  mVelY = BALL_VEL;
+}

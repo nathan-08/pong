@@ -22,7 +22,8 @@ GlyphCache::GlyphCache( SDL_Renderer *r, TTF_Font *f )
   {
     int minx, maxx, miny, maxy, advance;
     TTF_GlyphMetrics( font, ch, &minx, &maxx, &miny, &maxy, &advance );
-    glyph_map[ ch ] = SDL_Rect { xoffset, 0, advance, 8 };
+    int fheight = TTF_FontHeight( font );
+    glyph_map[ ch ] = SDL_Rect { xoffset, 0, advance, fheight }; // 8
     xoffset += advance;
   }
   // generate glyphset texture

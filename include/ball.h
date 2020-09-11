@@ -5,6 +5,7 @@
 
 #include "bar.h"
 
+enum MoveResult { Default, Collided, GoalLeft, GoalRight };
 enum CollisionAxis { None = 0, Horiz = 1, Vert = 2, Both = 3 };
 class Ball
 {
@@ -13,6 +14,7 @@ class Ball
     int mVelX, mVelY;
     SDL_Rect mCollider;
     CollisionAxis checkCollision( const Bar &bar );
+    bool isActive = false;
 
   public:
     static const int BALL_VEL = 6;
@@ -22,8 +24,9 @@ class Ball
 
     void handleEvent( SDL_Event &e );
 
-    bool move( const SDL_Rect &bar );
-    bool move( const std::vector<Bar> &bars );
+    MoveResult move( const std::vector<Bar> &bars );
 
     void render( SDL_Renderer *r );
+    bool getIsActive() const { return isActive; }
+    void reset();
 };

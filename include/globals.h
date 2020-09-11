@@ -1,8 +1,8 @@
 #pragma once
 
 const int SCREEN_MULTIPLIER = 1;
-const int L_WIDTH = 1400;
-const int L_HEIGHT = 1200;
+const int L_WIDTH = 1600;
+const int L_HEIGHT = 1000;
 const int SCREEN_WIDTH = L_WIDTH * SCREEN_MULTIPLIER;
 const int SCREEN_HEIGHT = L_HEIGHT * SCREEN_MULTIPLIER;
 

@@ -3,8 +3,8 @@
 #include "bar.h"
 #include "globals.h"
 
-Bar::Bar( int x, int y, SDL_Keycode upkey, SDL_Keycode downkey, SDL_Keycode leftkey, SDL_Keycode rightkey )
-  : up( upkey ), down( downkey ), left( leftkey ), right( rightkey )
+Bar::Bar( Side s, int x, int y, SDL_Keycode upkey, SDL_Keycode downkey, SDL_Keycode leftkey, SDL_Keycode rightkey )
+  : up( upkey ), down( downkey ), left( leftkey ), right( rightkey ), side( s )
 {
   mPosX = x;
   mPosY = y;
@@ -36,18 +36,30 @@ void Bar::handleEvent( SDL_Event &e )
 void Bar::move()
 {
   mPosY += mVelY;
+  if( mPosY < 0 || ( mPosY + BAR_HEIGHT > L_HEIGHT ) )
+  {
+    mPosY -= mVelY;
+  }
   mCollider.y = mPosY;
-  //if( mPosY < 0 || ( mPosY + BAR_HEIGHT > L_HEIGHT ) )
-  //{
-    //mPosY -= mVelY;
-  //}
 
-  mPosX += mVelX;
-  mCollider.x = mPosX;
-  //if( mPosX < 0 || ( mPosX + BAR_WIDTH > L_WIDTH ) )
-  //{
-    //mPosX -= mVelX;
-  //}
+  if( side == LEFT )
+  {
+    mPosX += mVelX;
+    if( mPosX < 0 || ( mPosX + BAR_WIDTH > L_WIDTH / 2 ) )
+    {
+      mPosX -= mVelX;
+    }
+    mCollider.x = mPosX;
+  }
+  else if( side == RIGHT )
+  {
+    mPosX += mVelX;
+    if( mPosX < L_WIDTH / 2 || ( mPosX + BAR_WIDTH > L_WIDTH ) )
+    {
+      mPosX -= mVelX;
+    }
+    mCollider.x = mPosX;
+  }
 }
 
 void Bar::render( SDL_Renderer *r )
